@@ -123,7 +123,7 @@ CREATE TABLE Documentos (
 
 GO
 
-CREATE TABLE TiposJornadas (
+CREATE TABLE TiposJornada (
 	idTipoJornada INT IDENTITY(1,1) NOT NULL,
 	nombre NVARCHAR(50) NOT NULL,
 	descripcion NVARCHAR(250) NOT NULL,
@@ -131,5 +131,49 @@ CREATE TABLE TiposJornadas (
 	estadoRegistro BIT NOT NULL,
 
 	CONSTRAINT pkTipoJornada PRIMARY KEY (idTipoJornada),
-	CONSTRAINT uqNombreUnicoTiposJornadas UNIQUE (nombre)
+	CONSTRAINT uqNombreUnicoTiposJornadas UNIQUE (nombre),
+	CONSTRAINT ckEstadoRegistroTiposJornada CHECK (estadoRegistro IN (1, 0))
 );
+
+GO
+
+CREATE TABLE TiposModalidad (
+	idTipoModalidad INT IDENTITY(1,1) NOT NULL,
+	nombre NVARCHAR(50) NOT NULL,
+	descripcion NVARCHAR(250) NOT NULL,
+	fechaCreacionRegistro DATE NOT NULL,
+	estadoRegistro BIT NOT NULL,
+
+	CONSTRAINT pkTipoModalidad PRIMARY KEY (idTipoModalidad),
+	CONSTRAINT uqNombreUnicoTipoModalidad UNIQUE (nombre),
+	CONSTRAINT ckEstadoRegistroTiposJornada CHECK (estadoRegistro IN (1, 0))
+);
+
+GO
+
+CREATE TABLE Convocatorias (
+	idConvocatoria INT IDENTITY(1,1) NOT NULL,
+	idTipoModalidad INT NOT NULL,
+	idTipoJornada INT NOT NULL,
+	idEmpresa INT NOT NULL,
+	titulo NVARCHAR(250) NOT NULL,
+	descripcion NVARCHAR(550) NOT NULL,
+	SalarioMinimo DECIMAL(10,2) NOT NULL,
+	SalarioMaximo DECIMAL(10,2) NOT NULL,
+	mostrarSalario BIT NOT NULL,
+	fechaInicio DATE NOT NULL,
+	fechaFinalizacion DATE NOT NULL,
+	fechaCreacionRegistro DATE NOT NULL,
+	estadoRegistro BIT NOT NULL,
+
+	CONSTRAINT pkConvocatoria PRIMARY KEY (idConvocatoria),
+	CONSTRAINT fkTipoModalidadConvocatorias FOREIGN KEY (idTipoModalidad) REFERENCES TiposModalidad(idTipoModalidad),
+	CONSTRAINT fkTipoJornadaConvocatorias FOREIGN KEY (idTipoJornada) REFERENCES TiposJornada(idTipoJornada),
+	CONSTRAINT fkEmpresaConvocatorias FOREIGN KEY (idEmpresa) REFERENCES Empresa(idEmpresa),
+	CONSTRAINT ckMostrarSalario CHECK (mostrarSalario IN (1, 0)),
+	CONSTRAINT ckFechaFinalizacion CHECK (fechaFinalizacion > fechaInicio),
+	CONSTRAINT ckEstadoRegistroConvocatorias CHECK (estadoRegistro IN (1, 0))
+);
+
+GO
+
