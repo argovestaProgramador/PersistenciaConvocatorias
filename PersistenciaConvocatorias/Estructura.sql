@@ -166,8 +166,8 @@ CREATE TABLE Reclutamiento.Convocatorias (
 	idEmpresa INT NOT NULL,
 	titulo NVARCHAR(250) NOT NULL,
 	descripcion NVARCHAR(550) NOT NULL,
-	SalarioMinimo DECIMAL(10,2) NOT NULL,
-	SalarioMaximo DECIMAL(10,2) NOT NULL,
+	salarioMinimo DECIMAL(10,2) NOT NULL,
+	salarioMaximo DECIMAL(10,2) NOT NULL,
 	mostrarSalario BIT NOT NULL,
 	fechaInicio DATE NOT NULL,
 	fechaFinalizacion DATE NOT NULL,
@@ -232,6 +232,8 @@ CREATE TABLE Reclutamiento.Postulaciones (
 	CONSTRAINT ckEstadoRegistroPostulaciones CHECK (estadoRegistro IN (1, 0))
 );
 
+-- registros
+
 INSERT INTO Seguridad.RolesUsuario (nombre, descripcion, fechaCreacionRegistro, estadoRegistro)
 VALUES 
     (N'admin', N'Administrador total del sistema', GETDATE(), 1),
@@ -284,7 +286,7 @@ VALUES
     (N'virtual', N'Trabajo 100% remoto', GETDATE(), 1);
 GO
 
-INSERT INTO Reclutamiento.Convocatorias (idTipoModalidad, idTipoJornada, idEmpresa, titulo, descripcion, SalarioMinimo, SalarioMaximo, mostrarSalario, fechaInicio, fechaFinalizacion, fechaCreacionRegistro, estadoRegistro)
+INSERT INTO Reclutamiento.Convocatorias (idTipoModalidad, idTipoJornada, idEmpresa, titulo, descripcion, salarioMinimo, salarioMaximo, mostrarSalario, fechaInicio, fechaFinalizacion, fechaCreacionRegistro, estadoRegistro)
 VALUES 
     (3, 2, 1, N'Desarrollador Backend Senior C# / SQL', N'Buscamos un desarrollador backend con experiencia comprobada en .NET Core y SQL Server.', 4500.00, 6500.00, 1, '2026-08-01', '2026-09-01', GETDATE(), 1);
 GO
@@ -307,4 +309,274 @@ INSERT INTO Reclutamiento.Postulaciones (idEstadoPostulacion, idResolucionPostul
 VALUES 
     (1, 1, 1, 2, 5000.00, '2026-08-04', GETDATE(), 1);
 GO
+
+-- procedimientos Convocatoria
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarConvocatorias
+AS 
+	BEGIN
+		SELECT con.idConvocatoria,
+			   tip.nombre AS "tipoModalidad",
+			   jor.nombre AS "tipoJornada",
+			   em.nombreComercial AS "empresa",
+			   con.titulo,
+			   con.descripcion,
+			   CASE
+				WHEN mostrarSalario = 1 THEN con.SalarioMinimo
+				ELSE 0
+			   END AS "salarioMinimo",
+			   CASE
+			    WHEN mostrarSalario = 1 THEN con.SalarioMaximo
+				ELSE 0
+			   END AS "salarioMaximo",
+			   con.fechaInicio,
+			   con.fechaFinalizacion
+		FROM Reclutamiento.Convocatorias AS con
+		INNER JOIN Reclutamiento.TiposModalidad AS tip ON tip.idTipoModalidad = con.idTipoModalidad
+		INNER JOIN Reclutamiento.TiposJornada AS jor ON jor.idTipoJornada = con.idTipoJornada
+		INNER JOIN Seguridad.Empresas AS em ON em.idEmpresa = con.idEmpresa
+		WHERE con.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarConvocatoriasTipoModalidad
+(
+	@idTipoModalidad INT
+)
+AS
+	BEGIN
+		SELECT con.idConvocatoria,
+			   tip.nombre AS "tipoModalidad",
+			   jor.nombre AS "tipoJornada",
+			   em.nombreComercial AS "empresa",
+			   con.titulo,
+			   con.descripcion,
+			   CASE
+				WHEN mostrarSalario = 1 THEN con.SalarioMinimo
+				ELSE 0
+			   END AS "salarioMinimo",
+			   CASE
+			    WHEN mostrarSalario = 1 THEN con.SalarioMaximo
+				ELSE 0
+			   END AS "salarioMaximo",
+			   con.fechaInicio,
+			   con.fechaFinalizacion
+		FROM Reclutamiento.Convocatorias AS con
+		INNER JOIN Reclutamiento.TiposModalidad AS tip ON tip.idTipoModalidad = con.idTipoModalidad
+		INNER JOIN Reclutamiento.TiposJornada AS jor ON jor.idTipoJornada = con.idTipoJornada
+		INNER JOIN Seguridad.Empresas AS em ON em.idEmpresa = con.idEmpresa
+		WHERE con.estadoRegistro = 1 AND con.idTipoModalidad = @idTipoModalidad;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarConvocatoriasTipoJornada
+(
+	@idTipoJornada INT
+)
+AS 
+	BEGIN
+		SELECT con.idConvocatoria,
+			   tip.nombre AS "tipoModalidad",
+			   jor.nombre AS "tipoJornada",
+			   em.nombreComercial AS "empresa",
+			   con.titulo,
+			   con.descripcion,
+			   CASE
+				WHEN mostrarSalario = 1 THEN con.SalarioMinimo
+				ELSE 0
+			   END AS "salarioMinimo",
+			   CASE
+			    WHEN mostrarSalario = 1 THEN con.SalarioMaximo
+				ELSE 0
+			   END AS "salarioMaximo",
+			   con.fechaInicio,
+			   con.fechaFinalizacion
+		FROM Reclutamiento.Convocatorias AS con
+		INNER JOIN Reclutamiento.TiposModalidad AS tip ON tip.idTipoModalidad = con.idTipoModalidad
+		INNER JOIN Reclutamiento.TiposJornada AS jor ON jor.idTipoJornada = con.idTipoJornada
+		INNER JOIN Seguridad.Empresas AS em ON em.idEmpresa = con.idEmpresa
+		WHERE con.estadoRegistro = 1 AND con.idTipoJornada = @idTipoJornada;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarConvocatoriasEmpresa
+(
+	@idEmpresa INT
+)
+AS 
+	BEGIN
+		SELECT con.idConvocatoria,
+			   tip.nombre AS "tipoModalidad",
+			   jor.nombre AS "tipoJornada",
+			   em.nombreComercial AS "empresa",
+			   con.titulo,
+			   con.descripcion,
+			   CASE
+				WHEN mostrarSalario = 1 THEN con.SalarioMinimo
+				ELSE 0
+			   END AS "salarioMinimo",
+			   CASE
+			    WHEN mostrarSalario = 1 THEN con.SalarioMaximo
+				ELSE 0
+			   END AS "salarioMaximo",
+			   con.fechaInicio,
+			   con.fechaFinalizacion
+		FROM Reclutamiento.Convocatorias AS con
+		INNER JOIN Reclutamiento.TiposModalidad AS tip ON tip.idTipoModalidad = con.idTipoModalidad
+		INNER JOIN Reclutamiento.TiposJornada AS jor ON jor.idTipoJornada = con.idTipoJornada
+		INNER JOIN Seguridad.Empresas AS em ON em.idEmpresa = con.idEmpresa
+		WHERE con.estadoRegistro = 1 AND con.idEmpresa = @idEmpresa;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_buscarConvocatoriaPorId
+(
+	@idConvocatoria INT
+)
+AS
+	BEGIN
+		SELECT con.idConvocatoria,
+			   tip.nombre AS "tipoModalidad",
+			   jor.nombre AS "tipoJornada",
+			   em.nombreComercial AS "empresa",
+			   con.titulo,
+			   con.descripcion,
+			   CASE
+				WHEN mostrarSalario = 1 THEN con.SalarioMinimo
+				ELSE 0
+			   END AS "salarioMinimo",
+			   CASE
+			    WHEN mostrarSalario = 1 THEN con.SalarioMaximo
+				ELSE 0
+			   END AS "salarioMaximo",
+			   con.fechaInicio,
+			   con.fechaFinalizacion
+		FROM Reclutamiento.Convocatorias AS con
+		INNER JOIN Reclutamiento.TiposModalidad AS tip ON tip.idTipoModalidad = con.idTipoModalidad
+		INNER JOIN Reclutamiento.TiposJornada AS jor ON jor.idTipoJornada = con.idTipoJornada
+		INNER JOIN Seguridad.Empresas AS em ON em.idEmpresa = con.idEmpresa
+		WHERE con.estadoRegistro = 1 AND con.idConvocatoria = @idConvocatoria;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_crearConvocatoria
+(
+	@idTipoModalidad INT,
+	@idTipoJornada INT,
+	@idEmpresa INT,
+	@titulo NVARCHAR(250),
+	@descripcion NVARCHAR(550),
+	@salarioMinimo DECIMAL(10,2),
+	@salarioMaximo DECIMAL(10,2),
+	@fechaInicio DATE,
+	@fechaFinalizacion DATE 
+)
+AS 
+	BEGIN
+		INSERT INTO Reclutamiento.Convocatorias(idTipoModalidad, idTipoJornada, idEmpresa, titulo, descripcion, SalarioMinimo, 
+				    SalarioMaximo, mostrarSalario, fechaInicio, fechaFinalizacion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@idTipoModalidad, @idTipoJornada, @idEmpresa, @titulo, @descripcion, @salarioMinimo, @salarioMaximo, 1, 
+				@fechaInicio, @fechaFinalizacion, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_actualizarConvocatoria
+(
+	@idTipoModalidad INT,
+	@idTipoJornada INT,
+	@idEmpresa INT,
+	@titulo NVARCHAR(250),
+	@descripcion NVARCHAR(550),
+	@salarioMinimo DECIMAL(10,2),
+	@salarioMaximo DECIMAL(10,2),
+	@mostrarSalario BIT,
+	@fechaInicio DATE,
+	@fechaFinalizacion DATE,
+	@idConvocatoria INT
+)
+AS 
+	BEGIN
+		UPDATE Reclutamiento.Convocatorias
+		SET idTipoModalidad = @idTipoModalidad, idTipoJornada = @idTipoJornada, idEmpresa = @idEmpresa, titulo = @titulo, descripcion = @descripcion,
+			salarioMinimo = @salarioMinimo, salarioMaximo = @salarioMaximo, mostrarSalario = @mostrarSalario, fechaInicio = @fechaInicio, fechaFinalizacion = @fechaFinalizacion
+		WHERE idConvocatoria = @idConvocatoria;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_eliminarConvocatoria
+(
+	@idConvocatoria INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.Convocatorias
+		SET estadoRegistro = 0
+		WHERE idConvocatoria = @idConvocatoria;
+	END;
+
+-- Procedimientos Estados de postulacion
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarEstadosPostulacion
+AS
+	BEGIN
+		SELECT est.idEstadoPostulacion,
+			   est.nombre,
+			   est.descripcion
+		FROM Reclutamiento.EstadosPostulacion AS est
+		WHERE est.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_crearEstadoPostulacion
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Reclutamiento.EstadosPostulacion(nombre, descripcion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@nombre, @descripcion, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_actualizarEstadoPostulacion
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250),
+	@idEstadoPostulacion INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.EstadosPostulacion
+		SET nombre = @nombre, descripcion = @descripcion
+		WHERE idEstadoPostulacion = @idEstadoPostulacion;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_eliminarEstadoPostulacion
+(
+	@idEstadoPostulacion INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.EstadosPostulacion
+		SET estadoRegistro = 0
+		WHERE idEstadoPostulacion = @idEstadoPostulacion;
+	END;
+
+GO
+
+-- Procedimientos Postulaciones
 
