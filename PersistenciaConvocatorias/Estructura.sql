@@ -124,7 +124,7 @@ CREATE TABLE Seguridad.Documentos (
 	CONSTRAINT pkDocumento PRIMARY KEY (idDocumento),
 	CONSTRAINT fkTipoDocumentoDocumentos FOREIGN KEY (idTipoDocumento) REFERENCES Seguridad.TiposDocumento(idTipoDocumento),
 	CONSTRAINT fkUsuarioDocumentos FOREIGN KEY (idUsuario) REFERENCES Seguridad.Usuarios(idUsuario),
-	CONSTRAINT fkTipoExtensionDocumentos FOREIGN KEY (idTipoDocumento) REFERENCES Seguridad.TiposExtension(idTipoExtension),
+	CONSTRAINT fkTipoExtensionDocumentos FOREIGN KEY (idExtension) REFERENCES Seguridad.TiposExtension(idTipoExtension),
 	CONSTRAINT uqRutaRelativa UNIQUE (rutaRelativa),
 	CONSTRAINT ckEstadoRegistroDocumentos CHECK (estadoRegistro IN (1, 0))
 );
@@ -804,3 +804,313 @@ AS
 GO
 
 -- procedimientos Tipos jornada
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarTiposJornada
+AS
+	BEGIN
+		SELECT tip.idTipoJornada,
+			   tip.nombre,
+			   tip.descripcion
+		FROM Reclutamiento.TiposJornada AS tip
+		WHERE tip.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_crearTipoJornada
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Reclutamiento.TiposJornada( nombre, descripcion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@nombre, @descripcion, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_actualizarTipoJornada
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250),
+	@idTipoJornada INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.TiposJornada
+		SET nombre = @nombre, descripcion = @descripcion
+		WHERE idTipoJornada = @idTipoJornada;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_eliminarTipoJornada
+(
+	@idTipoJornada INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.TiposJornada
+		SET estadoRegistro = 0
+		WHERE idTipoJornada = @idTipoJornada;
+	END;
+
+GO
+
+-- procedimientos tipo modalidad
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarTiposModalidad
+AS
+	BEGIN
+		SELECT tip.idTipoModalidad,
+			   tip.nombre,
+			   tip.descripcion
+		FROM Reclutamiento.TiposModalidad AS tip
+		WHERE tip.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_crearTipoModalidad
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Reclutamiento.TiposModalidad(nombre, descripcion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@nombre, @descripcion, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_actualizarTipoModalidad
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250),
+	@idTipoModalidad INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.TiposModalidad
+		SET nombre = @nombre, descripcion = @descripcion
+		WHERE idTipoModalidad = @idTipoModalidad;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_eliminarTipoModalidad
+(
+	@idTipoModalidad INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.TiposModalidad
+		SET estadoRegistro = 0
+		WHERE idTipoModalidad = @idTipoModalidad;
+	END;
+
+GO
+
+-- procedimientos documentos
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarDocumentos
+AS
+	BEGIN
+		SELECT doc.idDocumento,
+			   usu.nombre AS "usuario",
+			   tipDoc.nombre AS "tipoDocumento",
+			   tipEx.nombreExtension AS "extension",
+			   doc.rutaRelativa,
+			   doc.nombreLogico
+		FROM Seguridad.Documentos AS doc
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = doc.idUsuario
+		INNER JOIN Seguridad.TiposDocumento AS tipDoc ON tipDoc.idTipoDocumento = doc.idTipoDocumento
+		INNER JOIN Seguridad.TiposExtension AS tipEx On tipEx.idTipoExtension = doc.idExtension
+		WHERE doc.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarDocumentosUsuario
+(
+	@idUsuario INT
+)
+AS
+	BEGIN
+		SELECT doc.idDocumento,
+			   usu.nombre AS "usuario",
+			   tipDoc.nombre AS "tipoDocumento",
+			   tipEx.nombreExtension AS "extension",
+			   doc.rutaRelativa,
+			   doc.nombreLogico
+		FROM Seguridad.Documentos AS doc
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = doc.idUsuario
+		INNER JOIN Seguridad.TiposDocumento AS tipDoc ON tipDoc.idTipoDocumento = doc.idTipoDocumento
+		INNER JOIN Seguridad.TiposExtension AS tipEx On tipEx.idTipoExtension = doc.idExtension
+		WHERE doc.estadoRegistro = 1 AND doc.idUsuario = @idUsuario;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarDocumentosTipoDocumento
+(
+	@idTipoDocumento INT
+)
+AS
+	BEGIN
+		SELECT doc.idDocumento,
+			   usu.nombre AS "usuario",
+			   tipDoc.nombre AS "tipoDocumento",
+			   tipEx.nombreExtension AS "extension",
+			   doc.rutaRelativa,
+			   doc.nombreLogico
+		FROM Seguridad.Documentos AS doc
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = doc.idUsuario
+		INNER JOIN Seguridad.TiposDocumento AS tipDoc ON tipDoc.idTipoDocumento = doc.idTipoDocumento
+		INNER JOIN Seguridad.TiposExtension AS tipEx On tipEx.idTipoExtension = doc.idExtension
+		WHERE doc.estadoRegistro = 1 AND doc.idTipoDocumento = @idTipoDocumento;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_crearDocumento
+(
+	@idUsuario INT,
+	@idTipoDocumento INT,
+	@idExtension INT,
+	@rutaRelativa NVARCHAR(250),
+	@nombreLogico NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Seguridad.Documentos(idUsuario, idTipoDocumento, idExtension, rutaRelativa, nombreLogico, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@idUsuario, @idTipoDocumento, @idExtension, @rutaRelativa, @nombreLogico, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_actualizarDocumento
+(
+	@idUsuario INT,
+	@idTipoDocumento INT,
+	@idExtension INT,
+	@rutaRelativa NVARCHAR(250),
+	@nombreLogico NVARCHAR(250),
+	@idDocumento INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.Documentos
+		SET idUsuario = @idUsuario, idTipoDocumento = @idTipoDocumento, idExtension = @idExtension, rutaRelativa = @rutaRelativa, nombreLogico = @nombreLogico
+		WHERE idDocumento = @idDocumento;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_eliminarDocumento
+(
+	@idDocumento INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.Documentos
+		SET estadoRegistro = 0
+		WHERE idDocumento = @idDocumento;
+	END;
+
+GO
+
+-- procedimientos Empresas
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarEmpresas
+AS	
+	BEGIN
+		SELECT em.idEmpresa,
+			   usu.nombre AS "usuario",
+			   em.razonSocial,
+			   em.nombreComercial,
+			   em.ruc,
+			   em.direccionFisica,
+			   em.telefono,
+			   em.correoElectronico
+		FROM Seguridad.Empresas AS em
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = em.idUsuario
+		WHERE em.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarEmpresasUsuario
+(
+	@idUsuario INT
+)
+AS
+	BEGIN
+		SELECT em.idEmpresa,
+			   usu.nombre AS "usuario",
+			   em.razonSocial,
+			   em.nombreComercial,
+			   em.ruc,
+			   em.direccionFisica,
+			   em.telefono,
+			   em.correoElectronico
+		FROM Seguridad.Empresas AS em
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = em.idUsuario
+		WHERE em.estadoRegistro = 1 AND em.idUsuario = @idUsuario;
+	END
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_crearEmpresa
+(
+	@idUsuario INT,
+	@razonSocial NVARCHAR(250),
+	@nombreComercial NVARCHAR(250),
+	@ruc NCHAR(11),
+	@direccionFisica NVARCHAR(250),
+	@telefono NCHAR(9),
+	@correoElectronico NVARCHAR(100)
+)
+AS
+	BEGIN
+		INSERT INTO Seguridad.Empresas(idUsuario, razonSocial, nombreComercial, ruc, direccionFisica, telefono, correoElectronico, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@idUsuario, @razonSocial, @nombreComercial, @ruc, @direccionFisica, @telefono, @correoElectronico, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_actualizarEmpresa
+(
+	@idUsuario INT,
+	@razonSocial NVARCHAR(250),
+	@nombreComercial NVARCHAR(250),
+	@ruc NCHAR(11),
+	@direccionFisica NVARCHAR(250),
+	@telefono NCHAR(9),
+	@correoElectronico NVARCHAR(100),
+	@idEmpresa INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.Empresas
+		SET idUsuario = @idUsuario, razonSocial = @razonSocial, nombreComercial = @nombreComercial, ruc = @ruc, direccionFisica = @direccionFisica,
+			telefono = @telefono, correoElectronico = @correoElectronico
+		WHERE idEmpresa = @idEmpresa
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_eliminarEmpresa
+(
+	@idEmpresa INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.Empresas
+		SET estadoRegistro = 0
+		WHERE idEmpresa = @idEmpresa;
+	END;
+
+-- procedimientos roles Usuario
