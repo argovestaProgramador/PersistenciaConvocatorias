@@ -580,3 +580,227 @@ GO
 
 -- Procedimientos Postulaciones
 
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarPostulaciones
+AS 
+	BEGIN
+		SELECT pos.idPostulacion,
+			   est.nombre AS "estadoPostulacion",
+			   res.nombre AS "resolucionPostulacion",
+			   con.titulo AS "convocatoria",
+			   usu.usu AS "usuario",
+			   pos.pretensionSalarial,
+			   pos.fechaPostulacion
+		FROM Reclutamiento.Postulaciones AS pos
+		INNER JOIN Reclutamiento.EstadosPostulacion AS est ON est.idEstadoPostulacion = pos.idEstadoPostulacion
+		INNER JOIN Reclutamiento.ResolucionesPostulacion AS res ON res.idResolucionPostulacion = pos.idResolucionPostulacion
+		INNER JOIN Reclutamiento.Convocatorias AS con ON con.idConvocatoria = pos.idConvocatoria
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = pos.idUsuario
+		WHERE pos.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarPostulacionesEstadoPostulacion
+(
+	@idEstadoPostulacion INT
+)
+AS
+	BEGIN
+		SELECT pos.idPostulacion,
+			   est.nombre AS "estadoPostulacion",
+			   res.nombre AS "resolucionPostulacion",
+			   con.titulo AS "convocatoria",
+			   usu.usu AS "usuario",
+			   pos.pretensionSalarial,
+			   pos.fechaPostulacion
+		FROM Reclutamiento.Postulaciones AS pos
+		INNER JOIN Reclutamiento.EstadosPostulacion AS est ON est.idEstadoPostulacion = pos.idEstadoPostulacion
+		INNER JOIN Reclutamiento.ResolucionesPostulacion AS res ON res.idResolucionPostulacion = pos.idResolucionPostulacion
+		INNER JOIN Reclutamiento.Convocatorias AS con ON con.idConvocatoria = pos.idConvocatoria
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = pos.idUsuario
+		WHERE pos.estadoRegistro = 1 AND pos.idEstadoPostulacion = @idEstadoPostulacion;	
+	END;
+	
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarPostulacionesResolucionPostulacion
+(
+	@idResolucionPostulacion INT
+)
+AS
+	BEGIN
+		SELECT pos.idPostulacion,
+			   est.nombre AS "estadoPostulacion",
+			   res.nombre AS "resolucionPostulacion",
+			   con.titulo AS "convocatoria",
+			   usu.usu AS "usuario",
+			   pos.pretensionSalarial,
+			   pos.fechaPostulacion
+		FROM Reclutamiento.Postulaciones AS pos
+		INNER JOIN Reclutamiento.EstadosPostulacion AS est ON est.idEstadoPostulacion = pos.idEstadoPostulacion
+		INNER JOIN Reclutamiento.ResolucionesPostulacion AS res ON res.idResolucionPostulacion = pos.idResolucionPostulacion
+		INNER JOIN Reclutamiento.Convocatorias AS con ON con.idConvocatoria = pos.idConvocatoria
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = pos.idUsuario
+		WHERE pos.estadoRegistro = 1 AND pos.idResolucionPostulacion = @idResolucionPostulacion;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarPostulacionesConvocatoria
+(
+	@idConvocatoria INT
+)
+AS
+	BEGIN
+		SELECT pos.idPostulacion,
+			   est.nombre AS "estadoPostulacion",
+			   res.nombre AS "resolucionPostulacion",
+			   con.titulo AS "convocatoria",
+			   usu.usu AS "usuario",
+			   pos.pretensionSalarial,
+			   pos.fechaPostulacion
+		FROM Reclutamiento.Postulaciones AS pos
+		INNER JOIN Reclutamiento.EstadosPostulacion AS est ON est.idEstadoPostulacion = pos.idEstadoPostulacion
+		INNER JOIN Reclutamiento.ResolucionesPostulacion AS res ON res.idResolucionPostulacion = pos.idResolucionPostulacion
+		INNER JOIN Reclutamiento.Convocatorias AS con ON con.idConvocatoria = pos.idConvocatoria
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = pos.idUsuario
+		WHERE pos.estadoRegistro = 1 AND pos.idConvocatoria = @idConvocatoria;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarPostulacionesUsuario
+(
+	@idUsuario INT
+)
+AS 
+	BEGIN
+		SELECT pos.idPostulacion,
+			   est.nombre AS "estadoPostulacion",
+			   res.nombre AS "resolucionPostulacion",
+			   con.titulo AS "convocatoria",
+			   usu.usu AS "usuario",
+			   pos.pretensionSalarial,
+			   pos.fechaPostulacion
+		FROM Reclutamiento.Postulaciones AS pos
+		INNER JOIN Reclutamiento.EstadosPostulacion AS est ON est.idEstadoPostulacion = pos.idEstadoPostulacion
+		INNER JOIN Reclutamiento.ResolucionesPostulacion AS res ON res.idResolucionPostulacion = pos.idResolucionPostulacion
+		INNER JOIN Reclutamiento.Convocatorias AS con ON con.idConvocatoria = pos.idConvocatoria
+		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = pos.idUsuario
+		WHERE pos.estadoRegistro = 1 AND pos.idUsuario = @idUsuario;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_crearPostulacion
+(
+	@idConvocatoria INT,
+	@idUsuario INT,
+	@pretencionSalarial DECIMAL(10,2)
+)
+AS 
+	BEGIN
+		INSERT INTO Reclutamiento.Postulaciones(idEstadoPostulacion, idResolucionPostulacion, idConvocatoria, idUsuario, pretensionSalarial, fechaPostulacion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (
+			(SELECT est.idEstadoPostulacion FROM Reclutamiento.EstadosPostulacion AS est WHERE est.nombre = 'enviado'),
+			(SELECT re.idResolucionPostulacion FROM Reclutamiento.ResolucionesPostulacion AS re WHERE re.nombre = 'pendiente'),
+			@idConvocatoria,
+			@idUsuario,
+			@pretencionSalarial,
+			GETDATE(),
+			GETDATE(),
+			1
+		);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_actualizarPostulacion
+(
+	@idEstadoPostulacion INT,
+	@idResolucionPostulacion INT,
+	@idConvocatoria INT,
+	@idUsuario INT,
+	@pretencionSalarial DECIMAL(10,2),
+	@fechaPostulacion DATE,
+	@idPostulacion INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.Postulaciones
+		SET idEstadoPostulacion = @idEstadoPostulacion, idResolucionPostulacion = @idResolucionPostulacion, idConvocatoria = @idConvocatoria,
+			idUsuario = @idUsuario, pretensionSalarial = @pretencionSalarial, fechaPostulacion = @fechaPostulacion
+		WHERE idPostulacion = @idPostulacion;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_eliminarPostulacion
+(
+	@idPostulacion INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.Postulaciones
+		SET estadoRegistro = 0
+		WHERE idPostulacion = @idPostulacion;
+	END;
+
+GO
+
+-- procedimientos resoluciones postulacion
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_listarResolucionesPostulacion
+AS
+	BEGIN
+		SELECT re.idResolucionPostulacion,
+			   re.nombre,
+			   re.descripcion
+		FROM Reclutamiento.ResolucionesPostulacion AS re
+		WHERE re.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_crearResolucionPostulacion
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Reclutamiento.ResolucionesPostulacion(nombre, descripcion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@nombre, @descripcion, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_actualizarResolucionPostulacion
+(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250),
+	@idResolucionPostulacion INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.ResolucionesPostulacion
+		SET nombre = @nombre, descripcion = @descripcion
+		WHERE idResolucionPostulacion = @idResolucionPostulacion;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Reclutamiento.sp_eliminarResolucionPostulacion
+(
+	@idResolucionPostulacion INT
+)
+AS
+	BEGIN
+		UPDATE Reclutamiento.ResolucionesPostulacion
+		SET estadoRegistro = 0
+		WHERE idResolucionPostulacion = @idResolucionPostulacion;
+	END;
+
+GO
+
+-- procedimientos Tipos jornada
