@@ -1059,7 +1059,7 @@ AS
 		FROM Seguridad.Empresas AS em
 		INNER JOIN Seguridad.Usuarios AS usu ON usu.idUsuario = em.idUsuario
 		WHERE em.estadoRegistro = 1 AND em.idUsuario = @idUsuario;
-	END
+	END;
 
 GO
 
@@ -1114,3 +1114,273 @@ AS
 	END;
 
 -- procedimientos roles Usuario
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarRolesUsuario
+AS
+	BEGIN
+		SELECT ru.idRolUsuario,
+			   ru.nombre,
+			   ru.descripcion
+		FROM Seguridad.RolesUsuario AS ru
+		WHERE ru.estadoRegistro = 1;
+	END;
+
+GO
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_crearRolUsuario(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Seguridad.RolesUsuario(nombre, descripcion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@nombre, @descripcion, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_actualizarRolUsuario(
+	@nombre NVARCHAR(50),
+	@descripcion NVARCHAR(250),
+	@idRolUsuario INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.RolesUsuario
+		SET nombre = @nombre, descripcion = @descripcion
+		WHERE idRolUsuario = @idRolUsuario;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_eliminarRolUsuario(
+	@idRolUsuario INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.RolesUsuario
+		SET estadoRegistro = 0
+		WHERE idRolUsuario = @idRolUsuario;
+	END;
+
+GO
+
+-- procedimientos tipos de documento
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarTiposDocumento
+AS
+	BEGIN
+		SELECT tip.idTipoDocumento,
+			   tip.nombre,
+			   tip.descripcion
+		FROM Seguridad.TiposDocumento tip
+		WHERE tip.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_crearTipoDocumento(
+	@nombre NVARCHAR(100),
+	@descripcion NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Seguridad.TiposDocumento(nombre, descripcion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@nombre, @descripcion, GETDATE(), 1);
+	END;
+
+GO
+
+EXEC Seguridad.sp_crearTipoDocumento 'Perrito pelado', 'descripcion de un perrito pelado'
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_actualizarTipoDocumento(
+	@nombre NVARCHAR(100),
+	@descripcion NVARCHAR(250),
+	@idTipoDocumento INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.TiposDocumento
+		SET nombre = @nombre, descripcion = @descripcion
+		WHERE idTipoDocumento = @idTipoDocumento;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_eliminarTipoDocumento(
+	@idTipoDocumento INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.TiposDocumento
+		SET estadoRegistro = 0
+		WHERE idTipoDocumento = @idTipoDocumento;
+	END;
+
+GO
+
+-- procedimientos tipos extension
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarTiposExtension
+AS
+	BEGIN
+		SELECT tip.idTipoExtension,
+			   tip.nombreExtension,
+			   tip.descripcion
+		FROM Seguridad.TiposExtension AS tip
+		WHERE tip.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_crearTipoExtension(
+	@nombreExtension NVARCHAR(50),
+	@descripcion NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Seguridad.TiposExtension(nombreExtension, descripcion, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@nombreExtension, @descripcion, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_actualizarTipoExtension(
+	@nombreExtension NVARCHAR(50),
+	@descripcion NVARCHAR(250),
+	@idTipoExtension INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.TiposExtension
+		SET nombreExtension = @nombreExtension, descripcion = @descripcion
+		WHERE idTipoExtension = @idTipoExtension;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_eliminarTipoExtension(
+	@idTipoExtension INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.TiposExtension
+		SET estadoRegistro = 0
+		WHERE idTipoExtension = @idTipoExtension;
+	END;
+
+GO
+
+-- procedimientos de usuario
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarUsuarios
+AS
+	BEGIN
+		SELECT usu.idUsuario,
+			   rolUsu.nombre AS "rol",
+			   usu.nombre,
+			   usu.apellidoPaterno,
+			   usu.apellidoMaterno,
+			   usu.fechaNacimiento,
+			   usu.correoElectronico
+		FROM Seguridad.Usuarios AS usu
+		INNER JOIN Seguridad.RolesUsuario AS rolUsu ON usu.idRolUsuario = rolUsu.idRolUsuario
+		WHERE usu.estadoRegistro = 1;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_listarUsuariosRolUsuario(
+	@idRolUsuario INT
+)
+AS
+	BEGIN
+		SELECT usu.idUsuario,
+			   rolUsu.nombre AS "rol",
+			   usu.nombre,
+			   usu.apellidoPaterno,
+			   usu.apellidoMaterno,
+			   usu.fechaNacimiento,
+			   usu.correoElectronico
+		FROM Seguridad.Usuarios AS usu
+		INNER JOIN Seguridad.RolesUsuario AS rolUsu ON usu.idRolUsuario = rolUsu.idRolUsuario
+		WHERE usu.estadoRegistro = 1 AND usu.idRolUsuario = @idRolUsuario;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_BuscarUsuario(
+	@idUsuario INT
+)
+AS
+	BEGIN
+		SELECT usu.idUsuario,
+			   rolUsu.nombre AS "rol",
+			   usu.nombre,
+			   usu.apellidoPaterno,
+			   usu.apellidoMaterno,
+			   usu.fechaNacimiento,
+			   usu.correoElectronico
+		FROM Seguridad.Usuarios AS usu
+		INNER JOIN Seguridad.RolesUsuario AS rolUsu ON usu.idRolUsuario = rolUsu.idRolUsuario
+		WHERE usu.estadoRegistro = 1 AND usu.idUsuario = @idUsuario;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_crearUsuario(
+	@idRolUsuario INT,
+	@nombre NVARCHAR(50),
+	@apellidoPaterno NVARCHAR(50),
+	@apellidoMaterno NVARCHAR(50),
+	@fechaNacimiento DATE,
+	@correoElectronico NVARCHAR(100),
+	@usu NVARCHAR(50),
+	@passHash NVARCHAR(250)
+)
+AS
+	BEGIN
+		INSERT INTO Seguridad.Usuarios(idRolUsuario, nombre, apellidoPaterno, apellidoMaterno, fechaNacimiento, correoElectronico, usu, passHash, fechaCreacionRegistro, estadoRegistro)
+		VALUES (@idRolUsuario, @nombre, @apellidoPaterno, @apellidoMaterno, @fechaNacimiento, @correoElectronico, @usu, @passHash, GETDATE(), 1);
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_actualizarUsuario(
+	@idRolUsuario INT,
+	@nombre NVARCHAR(50),
+	@apellidoPaterno NVARCHAR(50),
+	@apellidoMaterno NVARCHAR(50),
+	@fechaNacimiento DATE,
+	@correoElectronico NVARCHAR(100),
+	@usu NVARCHAR(50),
+	@passHash NVARCHAR(250),
+	@idUsuario INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.Usuarios
+		SET idRolUsuario = @idRolUsuario, nombre = @nombre, apellidoPaterno = @apellidoPaterno, apellidoMaterno = @apellidoMaterno, fechaNacimiento = @fechaNacimiento,
+			correoElectronico = @correoElectronico, usu = @usu, passHash = @passHash
+		WHERE idUsuario = @idUsuario;
+	END;
+
+GO
+
+CREATE OR ALTER PROCEDURE Seguridad.sp_eliminarUsuario(
+	@idUsuario INT
+)
+AS
+	BEGIN
+		UPDATE Seguridad.Usuarios
+		SET estadoRegistro = 0
+		WHERE idUsuario = @idUsuario;
+	END;
+
+GO
